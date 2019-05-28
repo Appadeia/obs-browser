@@ -5,6 +5,7 @@
 #include <QString>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QScreen>
 
 class SysInfo : public QObject
 {

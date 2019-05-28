@@ -42,6 +42,7 @@ Window {
     }
 
     function search(query) {
+        errorSplash.visible = false
         root.loading = true;
         if (!root.leftHome) {
             fade.running = true;
@@ -65,6 +66,7 @@ Window {
                             root.results = http.responseText;
                         } else {
                             errorSplash.visible = true;
+                            root.results = "";
                         }
                         root.loading = false;
                     }
@@ -217,18 +219,6 @@ Window {
             }
         }
     }
-
-    Rectangle {
-        color: "black"
-        anchors.fill: parent
-        visible: false
-        Label {
-            color: "white"
-            anchors.centerIn: parent.center
-            text: "Whoops! There's an error!"
-        }
-        id: errorSplash
-    }
     Rectangle {
         id: home
         color: "#00000000"
@@ -258,7 +248,27 @@ Window {
             to: 0
         }
     }
-
+    Rectangle {
+        anchors.fill: parent
+        visible: false
+        color: "#00000000"
+        Material.elevation: 24
+        Rectangle {
+            anchors.centerIn: parent
+            color: "#CF6679"
+            height: parent.height / 2;
+            width: parent.width / 2;
+            radius: 4;
+            Label {
+                font.bold: true
+                font.pointSize: 14
+                anchors.centerIn: parent
+                color: "white"
+                text: "Whoops! There was an error!"
+            }
+        }
+        id: errorSplash
+    }
     Rectangle {
         id: loadingbar
         anchors.bottom: parent.bottom

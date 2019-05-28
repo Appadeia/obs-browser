@@ -1,3 +1,8 @@
+/*
+ *  Someone forgot to put a license header in this source file.
+ *  Guess I'll do it. Source project is here: https://github.com/Larpon/QuickDownload
+ *  If you're too lazy to navigate to the link, the license is the MIT license.
+ */
 #include "quickdownloadmaster.h"
 
 QuickDownloadMaster *QuickDownloadMaster::self = 0;

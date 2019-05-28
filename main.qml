@@ -189,6 +189,21 @@ Window {
                         }
                     }
                     Button {
+                        id: view
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 1
+
+                        anchors.right: install.left
+                        anchors.rightMargin: 10
+
+                        text: "View on OBS"
+                        onClicked: {
+                            dialog.openOBS(pkName, pkProject);
+                        }
+                    }
+
+                    Button {
+                        id: install
                         anchors.bottom: parent.bottom
                         anchors.right: parent.right
                         anchors.rightMargin: 1
@@ -333,6 +348,9 @@ Window {
         }
         function getYmpUrl(pk, project, distro) {
             return "https://software.opensuse.org/ymp/" + project + "/" + distro + "/" + pk + ".ymp";
+        }
+        function openOBS(pk, project) {
+            Qt.openUrlExternally(encodeURI("https://build.opensuse.org/package/show/" + project + "/" + pk));
         }
     }
 }

@@ -42,7 +42,7 @@ Window {
     }
 
     function search(query) {
-        errorSplash.visible = false
+        snackbar.close();
         root.loading = true;
         if (!root.leftHome) {
             fade.running = true;
@@ -65,7 +65,7 @@ Window {
                         if (http.status == 200) {
                             root.results = http.responseText;
                         } else {
-                            errorSplash.visible = true;
+                            snackbar.open();
                             root.results = "";
                         }
                         root.loading = false;
@@ -250,21 +250,75 @@ Window {
     }
     Rectangle {
         anchors.fill: parent
-        visible: false
+        visible: true
         color: "#00000000"
-        Material.elevation: 24
         Rectangle {
-            anchors.centerIn: parent
+            id: snackbar
+            Material.elevation: 24
+            visible: false
+            opacity: 0
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
             color: "#CF6679"
-            height: parent.height / 2;
+            height: parent.height / 10;
             width: parent.width / 2;
             radius: 4;
-            Label {
-                font.bold: true
-                font.pointSize: 14
+            Row {
                 anchors.centerIn: parent
-                color: "white"
-                text: "Whoops! There was an error!"
+                Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.bold: true
+                    font.pointSize: 13
+                    color: "white"
+                    text: "Whoops! There was an error!"
+                }
+            }
+            Button {
+                width: height
+                flat: true
+                text: ""
+                onClicked: {
+                    snackbar.close();
+                }
+            }
+            function close() {
+                exitAni.restart();
+            }
+            function open() {
+                enterAni.restart();
+            }
+
+            SequentialAnimation {
+                id: enterAni
+
+                ScriptAction {
+                    script: {
+                        snackbar.visible = true;
+                    }
+                }
+                NumberAnimation {
+                    target: snackbar
+                    property: "opacity"
+                    to: 1
+                    duration: 300
+                    easing.type: Easing.InOutQuad
+                }
+            }
+            SequentialAnimation {
+                id: exitAni
+
+                NumberAnimation {
+                    target: snackbar
+                    property: "opacity"
+                    to: 0
+                    duration: 300
+                    easing.type: Easing.InOutQuad
+                }
+                ScriptAction {
+                    script: {
+                        snackbar.visible = false;
+                    }
+                }
             }
         }
         id: errorSplash

@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QIcon>
 #include <QQuickStyle>
+#include <QFontDatabase>
 #include "sysinfo.h"
 #include "quickdownloadmaster.h"
 
@@ -36,6 +37,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
+
+    QFontDatabase::addApplicationFont(":/materialdesignicons-webfont.ttf");
 
     qmlRegisterType<SysInfo>("me.appadeia.SysInfo", 1, 0, "SysInfo");
     qmlRegisterType<QuickDownload>("com.blackgrain.qml.quickdownload", 1, 0, "Download");

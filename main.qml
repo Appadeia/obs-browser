@@ -16,6 +16,8 @@ Window {
     id: root
 
     property string results: ""
+    property string files: ""
+    property string meta: ""
     property string distro: ""
     property bool leftHome: false
     property bool loading: false
@@ -38,7 +40,6 @@ Window {
         } else {
             root.distro = "Tumbleweed";
         }
-        console.log(root.distro);
     }
 
     function search(query) {
@@ -73,7 +74,77 @@ Window {
                 }
         http.send(params);
     }
+    function packageFiles(proj, pk) {
+        var http = new XMLHttpRequest()
+        var url = "https://api.opensuse.org/source/" + proj + "/" + pk;
+        http.open("GET", url, true);
 
+        // Send the proper header information along with the request
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        http.setRequestHeader("Connection", "close");
+        http.setRequestHeader("Authorization", "Basic " + Qt.btoa("zyp_user" + ":" + "zyp_pw_1"))
+
+        http.onreadystatechange = function() { // Call a function when the state changes.
+                    if (http.readyState == 4) {
+                        if (http.status == 200) {
+                            root.files = http.responseText
+                        } else {
+
+                        }
+                        root.loading = false;
+                    }
+                }
+        http.send();
+    }
+    function packageMeta(proj, pk) {
+        var http = new XMLHttpRequest()
+        var url = "https://api.opensuse.org/source/" + proj + "/" + pk + "/_meta";
+        http.open("GET", url, true);
+
+        // Send the proper header information along with the request
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        http.setRequestHeader("Connection", "close");
+        http.setRequestHeader("Authorization", "Basic " + Qt.btoa("zyp_user" + ":" + "zyp_pw_1"))
+
+        http.onreadystatechange = function() { // Call a function when the state changes.
+                    if (http.readyState == 4) {
+                        if (http.status == 200) {
+                            root.meta = http.responseText
+                        } else {
+
+                        }
+                        root.loading = false;
+                    }
+                }
+        http.send();
+    }
+    function moreInfo(proj, pk) {
+        packageFiles(proj, pk);
+        packageMeta(proj, pk);
+        page.pkName = pk
+        pageIn.running = true
+    }
+
+    XmlListModel {
+        id: filesModel
+        xml: root.files
+        query: "/directory/entry"
+
+        XmlRole {
+            name: "fileName"
+            query: "@name/string()"
+        }
+    }
+    XmlListModel {
+        id: metaModel
+        xml: root.meta
+        query: "/package"
+
+        XmlRole {
+            name: "desc"
+            query: "description/string()"
+        }
+    }
     XmlListModel {
         id: resultsModel
         xml: root.results
@@ -191,6 +262,20 @@ Window {
                         }
                     }
                     Button {
+                        id: info
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 1
+
+                        anchors.right: view.left
+                        anchors.rightMargin: 10
+
+                        text: "View Info"
+                        onClicked: {
+                            root.moreInfo(pkProject, pkName);
+                        }
+                    }
+
+                    Button {
                         id: view
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 1
@@ -216,6 +301,21 @@ Window {
                         }
                     }
                 }
+            }
+        }
+    }
+    Component {
+        id: file
+
+        Row {
+            Rectangle {
+                width: 25
+                height: 1
+                color: "#00000000"
+            }
+            Label {
+                font.bold: true
+                text: fileName
             }
         }
     }
@@ -355,6 +455,96 @@ Window {
             }
         }
     }
+    Rectangle {
+        property string pkName: "Yeet"
+        id: page
+        width: root.width
+        height: root.height
+        x: width
+        y: 0
+        color: "#121212"
+
+        MouseArea {
+            anchors.fill: parent
+        }
+        SequentialAnimation {
+            id: pageIn
+            NumberAnimation {
+                target: page
+                property: "x"
+                from: page.width
+                to: 0
+                duration: 300
+                easing: Easing.InOutQuad
+            }
+            ScriptAction {
+                script: {
+                    page.x = 0
+                }
+            }
+        }
+        SequentialAnimation {
+            id: pageOut
+            NumberAnimation {
+                target: page
+                property: "x"
+                from: 0
+                to: page.width
+                duration: 300
+                easing: Easing.InOutQuad
+            }
+            ScriptAction {
+                script: {
+                    page.x = page.width
+                }
+            }
+        }
+        Column {
+            anchors.fill: parent
+            Button {
+                id: pageBack
+                text: ""
+                flat: true
+                onClicked: {
+                    pageOut.restart();
+                    root.files = "";
+                    root.meta = "";
+                }
+            }
+            Label {
+                id: pageName
+                font.bold: true
+                font.pointSize: 14
+                text: page.pkName
+            }
+            Repeater {
+                model: metaModel
+                delegate: Row {
+                    Rectangle {
+                        width: 25
+                        height: 1
+                        color: "#00000000"
+                    }
+                    Label {
+                        font.pointSize: 10
+                        wrapMode: Text.WordWrap
+                        text: desc
+                    }
+                }
+            }
+
+            Label {
+                font.bold: true
+                font.pointSize: 13
+                text: "Files"
+            }
+            Repeater {
+                model: filesModel
+                delegate: file
+            }
+        }
+    }
+
     Download {
         id: downloader
 
@@ -387,27 +577,9 @@ Window {
             Label {
                 text: "Launching download in YaST..."
             }
-
-            /*Label {
-                text: "To install your software of choice, use these commands in a terminal:"
-            }*/
-            /*TextEdit {
-                color: "white"
-                selectedTextColor: "white"
-                selectionColor: "#35b9ab"
-                readOnly: true
-                selectByMouse: true
-                id: installCommands
-                font.family: "Roboto Mono"
-                text: "Yeet \nYeet"
-
-            }*/
         }
         function show(pk, project, distro) {
-            // var proj = project.replace(":", ":/") + "/" + distro
-            // var projAlias = project.replace(":", "-")
             dialog.open()
-            // installCommands.text = "zypper ar " + "obs://" + proj + " " + projAlias + "\n" + "zypper in " + pk;
             downloader.start(getYmpUrl(pk, project, distro));
         }
         function getYmpUrl(pk, project, distro) {

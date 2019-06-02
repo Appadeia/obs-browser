@@ -191,30 +191,45 @@ Window {
 
 
 
-        GridView {
-            id: mainGrid
-            cellWidth: width;
-            cellHeight: height / 4;
+//        GridView {
+//            id: mainGrid
+//            cellWidth: width;
+//            cellHeight: height / 4;
+//            Layout.fillHeight: true
+//            Layout.fillWidth: true
+//            clip: true;
+//            model: resultsModel
+//            delegate: pk
+//            ScrollBar.vertical: ScrollBar {}
+//            populate: Transition {
+//                NumberAnimation {
+//                    property: "opacity"
+//                    from: 0
+//                    to: 1
+//                    duration: 300
+//                }
+//            }
+//            add: Transition {
+//                NumberAnimation {
+//                    property: "opacity"
+//                    from: 0
+//                    to: 1
+//                    duration: 300
+//                }
+//            }
+//        }
+        ScrollView {
             Layout.fillHeight: true
             Layout.fillWidth: true
-            clip: true;
-            model: resultsModel
-            delegate: pk
-            ScrollBar.vertical: ScrollBar {}
-            populate: Transition {
-                NumberAnimation {
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                    duration: 300
-                }
-            }
-            add: Transition {
-                NumberAnimation {
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                    duration: 300
+            clip: true
+            contentHeight: flow.height
+            contentWidth: width
+            Flow {
+                width: parent.width
+                height: parent.height
+                Repeater {
+                    model: resultsModel
+                    delegate: pk
                 }
             }
         }
@@ -223,8 +238,8 @@ Window {
         id: pk
 
         Item {
-            width: mainGrid.cellWidth
-            height: mainGrid.cellHeight
+            width: 600
+            height: 200
             Item {
                 width: parent.width * 0.9
                 height: parent.height * 0.9
